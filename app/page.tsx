@@ -2,7 +2,6 @@ import { Navigation } from "@/components/navigation"
 import { HeroSection } from "@/components/hero-section"
 import { AboutSection } from "@/components/about-section"
 import { ProductSection } from "@/components/product-section"
-import { TermsSection } from "@/components/terms-section"
 import { DonationSection } from "@/components/donation-section"
 import { Footer } from "@/components/footer"
 import { Toaster } from "@/components/ui/toaster"
@@ -14,7 +13,6 @@ export default function HomePage() {
       <HeroSection />
       <AboutSection />
       <ProductSection />
-      <TermsSection />
       <DonationSection />
       <Footer />
       <Toaster />

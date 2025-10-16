@@ -1,6 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import Link from "next/link"
+import { useEffect, useState } from "react"
+
 import { Button } from "@/components/ui/button"
 
 export function Navigation() {
@@ -35,12 +37,12 @@ export function Navigation() {
   }
 
   return (
-    <nav className="sticky top-0 z-50 bg-white border-b border-border">
-      <div className="max-w-6xl mx-auto px-6 py-4">
+    <nav className="sticky top-0 z-50 border-b border-border bg-white">
+      <div className="mx-auto max-w-6xl px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="text-2xl font-bold text-foreground">Done-Atur</div>
 
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden items-center space-x-8 md:flex">
             {[
               { id: "about", label: "About" },
               { id: "produk", label: "Produk" },
@@ -60,15 +62,17 @@ export function Navigation() {
           </div>
 
           <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              className="border-primary text-foreground hover:bg-[#ECF8F2] bg-transparent font-medium rounded-lg px-4 py-2"
-            >
-              Login
-            </Button>
+            <Link href="/auth/login">
+              <Button
+                variant="outline"
+                className="rounded-lg border-primary bg-transparent px-4 py-2 font-medium text-foreground hover:bg-[#ECF8F2]"
+              >
+                Login
+              </Button>
+            </Link>
             <Button
               onClick={() => scrollToSection("donasi")}
-              className="bg-primary hover:bg-[#5DBD98] text-primary-foreground font-medium rounded-lg px-5 py-3"
+              className="rounded-lg bg-primary px-5 py-3 font-medium text-primary-foreground hover:bg-[#5DBD98]"
             >
               Donasi
             </Button>
