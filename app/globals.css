@@ -116,6 +116,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -123,5 +124,45 @@
   /* Added smooth scrolling for anchor navigation */
   html {
     scroll-behavior: smooth;
+  }
+}
+
+/* Custom loader animation - diagonal pulse from bottom-left to top-right */
+@keyframes diagonalPulse {
+  0% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+}
+
+/* Fade out animation when loading completes - smooth exit without jank */
+@keyframes fadeOutSmooth {
+  0% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+@layer utilities {
+  .animate-diagonal-pulse {
+    animation: diagonalPulse 1.4s ease-in-out infinite;
+  }
+
+  .animate-fadeOutSmooth {
+    animation: fadeOutSmooth 0.5s cubic-bezier(0.4, 0, 0.2, 1) 800ms forwards;
   }
 }

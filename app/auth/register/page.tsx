@@ -223,6 +223,12 @@ export default function RegisterPage() {
                     Masuk di sini
                   </Link>
                 </p>
+                                
+                <div className="flex items-center justify-center text-sm">
+                  <Link href="/" className="font-medium text-white hover:underline">
+                    Kembali ke beranda
+                  </Link>
+                </div>
               </form>
             </Form>
           </div>

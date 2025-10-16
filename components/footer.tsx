@@ -35,11 +35,6 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a href="#terms" className="text-background/80 hover:text-background transition-colors">
-                  Syarat & Ketentuan
-                </a>
-              </li>
-              <li>
                 <a href="#donasi" className="text-background/80 hover:text-background transition-colors">
                   Donasi
                 </a>

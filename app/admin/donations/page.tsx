@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
+import { useLoaderFade } from "@/hooks/use-loader-fade"
 import { getDonations, updateDonationStatus, deleteDonation } from "@/lib/donations"
 import { Loader2, Trash2, Eye, FileText, Image as ImageIcon } from "lucide-react"
 import {
@@ -38,6 +39,7 @@ interface Donation {
 }
 
 export default function DonationsPage() {
+  useLoaderFade()
   const { toast } = useToast()
   const [donations, setDonations] = useState<Donation[]>([])
   const [isLoading, setIsLoading] = useState(true)

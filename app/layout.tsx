@@ -4,6 +4,8 @@ import { Inter } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { Suspense } from "react"
+import { PageLoader } from "@/components/loader"
+import { ClientLayoutWrapper } from "@/components/client-layout"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -24,7 +26,10 @@ export default function RootLayout({
   return (
     <html lang="id">
       <body className={`font-sans ${inter.variable} antialiased`}>
-        <Suspense fallback={null}>{children}</Suspense>
+        <PageLoader />
+        <ClientLayoutWrapper>
+          <Suspense fallback={null}>{children}</Suspense>
+        </ClientLayoutWrapper>
         <Analytics />
       </body>
     </html>

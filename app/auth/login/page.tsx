@@ -134,12 +134,6 @@ export default function LoginPage() {
                   )}
                 />
 
-                <div className="flex items-center justify-end text-sm">
-                  <Link href="/auth/register" className="font-medium text-white hover:underline">
-                    Belum punya akun?
-                  </Link>
-                </div>
-
                 <Button
                   type="submit"
                   className="w-full h-12 rounded-full bg-white text-gray-800 hover:bg-gray-200 transition duration-200"
@@ -154,6 +148,18 @@ export default function LoginPage() {
                     "Masuk sekarang"
                   )}
                 </Button>
+
+                <div className="flex items-center justify-end text-sm">
+                  <Link href="/auth/register" className="font-medium text-white hover:underline">
+                    Belum punya akun?
+                  </Link>
+                </div>
+                
+                <div className="flex items-center justify-center text-sm">
+                  <Link href="/" className="font-medium text-white hover:underline">
+                    Kembali ke beranda
+                  </Link>
+                </div>
               </form>
             </Form>
           </div>

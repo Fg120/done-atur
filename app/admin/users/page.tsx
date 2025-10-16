@@ -15,6 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Toaster } from "@/components/ui/toaster"
 import { toast } from "@/components/ui/use-toast"
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination"
+import { useLoaderFade } from "@/hooks/use-loader-fade"
 import { adminCreateUserSchema, type AdminCreateUserInput } from "@/lib/validators"
 
 interface UserRow {
@@ -46,6 +47,7 @@ const DATE_FORMATTER = new Intl.DateTimeFormat('id-ID', {
 const PAGE_SIZE = 10
 
 export default function AdminUsersPage() {
+  useLoaderFade()
   const router = useRouter()
   const [users, setUsers] = useState<UserRow[]>([])
   const [total, setTotal] = useState(0)

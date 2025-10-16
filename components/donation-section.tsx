@@ -12,19 +12,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useToast } from "@/hooks/use-toast"
-import { uploadTransferProof } from "@/lib/storage"
 import { Info, Upload, Loader2 } from "lucide-react"
 
 export function DonationSection() {
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
-    nama: "",
-    email: "",
-    nomorHp: "",
-    jenisDonasi: "",
-    nominal: "",
-    metodePembayaran: "",
+    nama: "test",
+    email: "test@gmail.com",
+    nomorHp: "0123456789",
+    jenisDonasi: "uang",
+    nominal: "100000",
+    metodePembayaran: "transfer",
     buktiTransfer: null as File | null,
     daftarPakaian: "",
     alamatPenjemputan: "",
@@ -43,19 +42,30 @@ export function DonationSection() {
       if (formData.jenisDonasi === "uang" && formData.buktiTransfer) {
         // Generate temporary ID for upload
         const tempId = `donation-${Date.now()}`
-        const uploadResult = await uploadTransferProof(formData.buktiTransfer, tempId)
+        
+        // Upload via API route
+        const uploadFormData = new FormData()
+        uploadFormData.append("file", formData.buktiTransfer)
+        uploadFormData.append("donationId", tempId)
 
-        if (uploadResult.error) {
+        const uploadResponse = await fetch("/api/upload", {
+          method: "POST",
+          body: uploadFormData,
+        })
+
+        const uploadData = await uploadResponse.json()
+
+        if (!uploadResponse.ok || uploadData.error) {
           toast({
             title: "Error Upload",
-            description: uploadResult.error,
+            description: uploadData.error || "Gagal mengupload bukti transfer",
             variant: "destructive",
           })
           setIsSubmitting(false)
           return
         }
 
-        transferProofUrl = uploadResult.url
+        transferProofUrl = uploadData.url
       }
 
       // Prepare data for database

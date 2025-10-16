@@ -71,6 +71,37 @@ export const userIdParamSchema = z.object({
   id: z.string().uuid(),
 })
 
+export const donationSchema = z.object({
+  donor_name: z.string().trim().min(1, "Nama diperlukan").max(100),
+  donor_email: z.string().trim().email("Email tidak valid"),
+  donor_phone: z.string().regex(/^(\+62|0)\d{9,12}$/, "Nomor HP tidak valid").optional().or(z.literal("")),
+  donation_type: z.enum(["uang", "pakaian"], {
+    errorMap: () => ({ message: "Pilih jenis donasi" }),
+  }),
+  nominal: z.string().optional(),
+  net_amount: z.number().optional(),
+  payment_method: z.enum(["transfer", "ewallet"]).optional(),
+  transfer_proof_url: z.string().url().nullable().optional(),
+  clothing_list: z.string().optional(),
+  pickup_address: z.string().optional(),
+  notes: z.string().max(500).optional(),
+  is_anonymous: z.boolean().optional(),
+})
+  .refine(
+    (data) => {
+      if (data.donation_type === "uang") {
+        return data.nominal && Number(data.nominal) > 0
+      }
+      if (data.donation_type === "pakaian") {
+        return data.clothing_list && data.clothing_list.length > 0
+      }
+      return false
+    },
+    {
+      message: "Detail donasi diperlukan",
+    }
+  )
+
 export type LoginInput = z.infer<typeof loginSchema>
 export type RegisterInput = z.infer<typeof registerSchema>
 export type ProfileUpdateInput = z.infer<typeof profileUpdateSchema>
@@ -78,3 +109,4 @@ export type AdminCreateUserInput = z.infer<typeof adminCreateUserSchema>
 export type AdminUpdateUserInput = z.infer<typeof adminUpdateUserSchema>
 export type PasswordUpdateInput = z.infer<typeof passwordUpdateSchema>
 export type UserQueryInput = z.infer<typeof userQuerySchema>
+export type DonationInput = z.infer<typeof donationSchema>
