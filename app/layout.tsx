@@ -6,6 +6,7 @@ import "./globals.css"
 import { Suspense } from "react"
 import { PageLoader } from "@/components/loader"
 import { ClientLayoutWrapper } from "@/components/client-layout"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -31,6 +32,7 @@ export default function RootLayout({
           <Suspense fallback={null}>{children}</Suspense>
         </ClientLayoutWrapper>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )
