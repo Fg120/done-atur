@@ -12,7 +12,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useToast } from "@/hooks/use-toast"
-import { createDonation } from "@/lib/donations"
 import { uploadTransferProof } from "@/lib/storage"
 import { Info, Upload, Loader2 } from "lucide-react"
 
@@ -76,7 +75,18 @@ export function DonationSection() {
         status: "pending",
       }
 
-      const result = await createDonation(donationData)
+      // Call API endpoint
+      const response = await fetch("/api/donations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(donationData),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to create donation")
+      }
 
       if (result.success) {
         toast({
