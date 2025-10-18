@@ -51,9 +51,9 @@ export function Footer() {
           <div className="space-y-4">
             <h3 className="font-semibold text-lg">Kontak</h3>
             <div className="space-y-2 text-sm text-background/80">
-              <p>Email: info@done-atur.com</p>
-              <p>Telepon: +62 21 1234 5678</p>
-              <p>Alamat: Jl. Kebaikan No. 123, Jakarta</p>
+              <p>Email: info.doneatur@gmail.com</p>
+              <p>Telepon: +62 852 5766 2876</p>
+              <p>Alamat: Jl. Kalimantan No. 37, Kampus Tegalboto, Jember</p>
             </div>
           </div>
 
@@ -62,22 +62,11 @@ export function Footer() {
             <h3 className="font-semibold text-lg">Ikuti Kami</h3>
             <div className="flex space-x-4">
               <a
-                href="#"
+                target="_blank"
+                href="https://www.instagram.com/doneatur.perintis?utm_source=ig_web_button_share_sheet&igsh=MWlyMGxlZjFmZDRzcw=="
                 className="w-10 h-10 bg-background/10 rounded-full flex items-center justify-center hover:bg-background/20 transition-colors"
               >
                 <Instagram className="w-5 h-5" />
-              </a>
-              <a
-                href="#"
-                className="w-10 h-10 bg-background/10 rounded-full flex items-center justify-center hover:bg-background/20 transition-colors"
-              >
-                <Twitter className="w-5 h-5" />
-              </a>
-              <a
-                href="#"
-                className="w-10 h-10 bg-background/10 rounded-full flex items-center justify-center hover:bg-background/20 transition-colors"
-              >
-                <Facebook className="w-5 h-5" />
               </a>
             </div>
           </div>

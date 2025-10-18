@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation"
-import { LogOut, Settings, User } from "lucide-react"
+import { LogOut, Settings, Users, User } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
