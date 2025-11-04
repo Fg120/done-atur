@@ -17,16 +17,18 @@ export async function GET(request: NextRequest) {
     // Get donations stats
     const { data: donations, error: donationsError } = await supabase
       .from("donations")
-      .select("id, donation_type, nominal, net_amount, status, donor_id")
+      .select("id, donation_type, nominal, net_amount, status, donor_email")
 
     if (donationsError) throw donationsError
 
     // Calculate statistics
     const stats = {
       totalDonations: donations?.length || 0,
-      totalDonors: new Set(donations?.map((d: any) => d.donor_id)).size || 0,
+      totalDonors: new Set(donations?.map((d: any) => d.donor_email).filter(Boolean)).size || 0,
       totalAmount: donations?.reduce((sum: number, d: any) => sum + (d.net_amount || 0), 0) || 0,
       pendingDonations: donations?.filter((d: any) => d.status === "pending").length || 0,
+      approvedDonations: donations?.filter((d: any) => d.status === "approved").length || 0,
+      rejectedDonations: donations?.filter((d: any) => d.status === "rejected").length || 0,
       moneyDonations: donations?.filter((d: any) => d.donation_type === "uang").length || 0,
       clothesDonations: donations?.filter((d: any) => d.donation_type === "pakaian").length || 0,
     }

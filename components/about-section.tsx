@@ -1,7 +1,45 @@
+"use client"
+
+import { useEffect, useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Heart, Users, Recycle } from "lucide-react"
 
+interface Stats {
+  totalAmount: number
+  clothesDonations: number
+  totalDonors: number
+}
+
 export function AboutSection() {
+  const [stats, setStats] = useState<Stats>({
+    totalAmount: 0,
+    clothesDonations: 0,
+    totalDonors: 0,
+  })
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch("/api/public/stats")
+        if (response.ok) {
+          const data = await response.json()
+          setStats({
+            totalAmount: data.totalAmount || 0,
+            clothesDonations: data.clothesDonations || 0,
+            totalDonors: data.totalDonors || 0,
+          })
+        }
+      } catch (error) {
+        console.error("Error fetching stats:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchStats()
+  }, [])
+
   const values = [
     {
       icon: Heart,
@@ -48,15 +86,21 @@ export function AboutSection() {
 
         <div className="grid md:grid-cols-3 gap-8 text-center">
           <div className="bg-card rounded-xl p-8 border border-border">
-            <div className="text-3xl font-bold text-primary mb-2">Rp 125.750.000+</div>
+            <div className="text-3xl font-bold text-primary mb-2">
+              Rp {isLoading ? "..." : (stats.totalAmount || 0).toLocaleString("id-ID")}
+            </div>
             <div className="text-muted-foreground">Donasi tersalurkan</div>
           </div>
           <div className="bg-card rounded-xl p-8 border border-border">
-            <div className="text-3xl font-bold text-primary mb-2">2.840+</div>
+            <div className="text-3xl font-bold text-primary mb-2">
+              {isLoading ? "..." : stats.clothesDonations || 0}+
+            </div>
             <div className="text-muted-foreground">Pakaian tersalurkan</div>
           </div>
           <div className="bg-card rounded-xl p-8 border border-border">
-            <div className="text-3xl font-bold text-primary mb-2">1.250+</div>
+            <div className="text-3xl font-bold text-primary mb-2">
+              {isLoading ? "..." : stats.totalDonors || 0}+
+            </div>
             <div className="text-muted-foreground">Penerima Donasi</div>
           </div>
         </div>

@@ -10,6 +10,8 @@ interface DashboardStats {
   totalDonors: number
   totalAmount: number
   pendingDonations: number
+  approvedDonations: number
+  rejectedDonations: number
   moneyDonations: number
   clothesDonations: number
 }
@@ -20,6 +22,8 @@ export default function AdminDashboard() {
     totalDonors: 0,
     totalAmount: 0,
     pendingDonations: 0,
+    approvedDonations: 0,
+    rejectedDonations: 0,
     moneyDonations: 0,
     clothesDonations: 0,
   })
@@ -87,6 +91,18 @@ export default function AdminDashboard() {
           label="Donasi Pending"
           value={stats.pendingDonations}
           description="Menunggu konfirmasi"
+        />
+        <StatCard
+          icon={Users}
+          label="Donasi Approved"
+          value={stats.approvedDonations}
+          description="Sudah dikonfirmasi"
+        />
+        <StatCard
+          icon={Gift}
+          label="Donasi Rejected"
+          value={stats.rejectedDonations}
+          description="Ditolak"
         />
       </div>
 

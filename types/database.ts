@@ -1,6 +1,6 @@
 export type UserRole = "admin" | "seller" | "user"
 export type DonationType = "uang" | "pakaian"
-export type DonationStatus = "pending" | "approved" | "rejected" | "completed"
+export type DonationStatus = "pending" | "approved" | "rejected"
 export type ProductCategory = "pria" | "wanita" | "anak"
 export type ProductCondition = "baru" | "preloved"
 export type ProductStatus = "active" | "inactive"

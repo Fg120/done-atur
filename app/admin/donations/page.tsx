@@ -33,7 +33,7 @@ interface Donation {
   pickup_address: string | null
   notes: string | null
   is_anonymous: boolean
-  status: "pending" | "approved" | "rejected" | "completed"
+  status: "pending" | "approved" | "rejected"
   created_at: string
   updated_at: string
 }
@@ -157,8 +157,6 @@ export default function DonationsPage() {
         return "bg-yellow-100 text-yellow-800"
       case "approved":
         return "bg-blue-100 text-blue-800"
-      case "completed":
-        return "bg-green-100 text-green-800"
       case "rejected":
         return "bg-red-100 text-red-800"
       default:
@@ -172,8 +170,6 @@ export default function DonationsPage() {
         return "Menunggu"
       case "approved":
         return "Disetujui"
-      case "completed":
-        return "Selesai"
       case "rejected":
         return "Ditolak"
       default:
@@ -201,7 +197,6 @@ export default function DonationsPage() {
                 <SelectItem value="all">Semua Status</SelectItem>
                 <SelectItem value="pending">Menunggu</SelectItem>
                 <SelectItem value="approved">Disetujui</SelectItem>
-                <SelectItem value="completed">Selesai</SelectItem>
                 <SelectItem value="rejected">Ditolak</SelectItem>
               </SelectContent>
             </Select>
@@ -296,7 +291,6 @@ export default function DonationsPage() {
                         <SelectContent>
                           <SelectItem value="pending">Menunggu</SelectItem>
                           <SelectItem value="approved">Disetujui</SelectItem>
-                          <SelectItem value="completed">Selesai</SelectItem>
                           <SelectItem value="rejected">Ditolak</SelectItem>
                         </SelectContent>
                       </Select>
