@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
     if (accountError) throw accountError
 
-    // Flatten all verified donation IDs
+    // Flatten all verified donation IDs (dari accountability)
     const verifiedDonationIds = new Set<string>()
     accountabilities?.forEach((record: any) => {
       if (record.donation_ids && Array.isArray(record.donation_ids)) {
@@ -36,19 +36,25 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    // Separate donations into verified and pending
-    const verifiedDonations = donations?.filter((d: any) => verifiedDonationIds.has(d.id)) || []
-    const pendingVerification = donations?.filter((d: any) => !verifiedDonationIds.has(d.id)) || []
+    // Donasi dengan status "pending" (menunggu persetujuan)
+    const pendingStatusDonations = donations?.filter((d: any) => d.status === "pending") || []
+
+    // Donasi approved yang masuk di pertanggungjawaban (verified)
+    const verifiedDonations = donations?.filter((d: any) => d.status === "approved" && verifiedDonationIds.has(d.id)) || []
+
+    // Donasi rejected
+    const rejectedDonations = donations?.filter((d: any) => d.status === "rejected") || []
 
     // Calculate statistics
     const stats = {
       totalDonations: donations?.length || 0,
       totalDonors: new Set(donations?.map((d: any) => d.donor_email).filter(Boolean)).size || 0,
+      pendingAmount: pendingStatusDonations.reduce((sum: number, d: any) => sum + (d.net_amount || 0), 0) || 0,
       verifiedAmount: verifiedDonations.reduce((sum: number, d: any) => sum + (d.net_amount || 0), 0) || 0,
-      pendingAmount: pendingVerification.reduce((sum: number, d: any) => sum + (d.net_amount || 0), 0) || 0,
-      pendingDonations: donations?.filter((d: any) => d.status === "pending").length || 0,
+      rejectedAmount: rejectedDonations.reduce((sum: number, d: any) => sum + (d.net_amount || 0), 0) || 0,
+      pendingDonations: pendingStatusDonations.length || 0,
       approvedDonations: donations?.filter((d: any) => d.status === "approved").length || 0,
-      rejectedDonations: donations?.filter((d: any) => d.status === "rejected").length || 0,
+      rejectedDonations: rejectedDonations.length || 0,
       moneyDonations: donations?.filter((d: any) => d.donation_type === "uang").length || 0,
       clothesDonations: donations?.filter((d: any) => d.donation_type === "pakaian").length || 0,
     }

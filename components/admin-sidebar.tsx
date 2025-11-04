@@ -12,6 +12,7 @@ import {
   Menu,
   X,
   Package,
+  FileText,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
@@ -35,6 +36,11 @@ export function AdminSidebar({ userEmail }: AdminSidebarProps) {
       icon: Gift,
       label: "Donasi",
       href: "/admin/donations",
+    },
+    {
+      icon: FileText,
+      label: "Pertanggungjawaban",
+      href: "/admin/accountability",
     },
     {
       icon: Package,

@@ -8,8 +8,9 @@ import { Loader2, Users, Gift, TrendingUp, Calendar } from "lucide-react"
 interface DashboardStats {
   totalDonations: number
   totalDonors: number
-  verifiedAmount: number
   pendingAmount: number
+  verifiedAmount: number
+  rejectedAmount: number
   pendingDonations: number
   approvedDonations: number
   rejectedDonations: number
@@ -21,8 +22,9 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats>({
     totalDonations: 0,
     totalDonors: 0,
-    verifiedAmount: 0,
     pendingAmount: 0,
+    verifiedAmount: 0,
+    rejectedAmount: 0,
     pendingDonations: 0,
     approvedDonations: 0,
     rejectedDonations: 0,
@@ -83,28 +85,22 @@ export default function AdminDashboard() {
           description="Jumlah donor yang terdaftar"
         />
         <StatCard
-          icon={TrendingUp}
-          label="Saldo Terverifikasi"
-          value={`Rp ${(stats.verifiedAmount || 0).toLocaleString("id-ID")}`}
-          description="Sudah masuk pertanggungjawaban"
-        />
-        <StatCard
           icon={Calendar}
           label="Saldo Pending"
           value={`Rp ${(stats.pendingAmount || 0).toLocaleString("id-ID")}`}
-          description="Belum dipertanggungjawabkan"
+          description="Menunggu persetujuan (status pending)"
         />
         <StatCard
-          icon={Users}
-          label="Donasi Approved"
-          value={stats.approvedDonations}
-          description="Sudah dikonfirmasi"
+          icon={TrendingUp}
+          label="Saldo Terverifikasi"
+          value={`Rp ${(stats.verifiedAmount || 0).toLocaleString("id-ID")}`}
+          description="Approved + masuk pertanggungjawaban"
         />
         <StatCard
           icon={Gift}
-          label="Donasi Rejected"
-          value={stats.rejectedDonations}
-          description="Ditolak"
+          label="Saldo Ditolak"
+          value={`Rp ${(stats.rejectedAmount || 0).toLocaleString("id-ID")}`}
+          description="Donasi dengan status rejected"
         />
       </div>
 
