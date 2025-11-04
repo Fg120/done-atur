@@ -1,6 +1,7 @@
 import { z } from "zod"
 
 import type { UserRole } from "@/types/database"
+import type { ProductCondition, ProductStatus } from "@/types/database"
 
 export const userRoleSchema = z.enum(["admin", "seller", "user"]) satisfies z.ZodType<UserRole>
 
@@ -63,7 +64,7 @@ export const userQuerySchema = z.object({
     .min(1)
     .max(120)
     .optional(),
-  sortBy: z.enum(["created_at", "name", "email"]).default("created_at"),
+  sortBy: z.enum(["created_at", "full_name", "email"]).default("created_at"),
   order: z.enum(["asc", "desc"]).default("desc"),
 })
 
@@ -102,6 +103,44 @@ export const donationSchema = z.object({
     }
   )
 
+// Products
+export const productConditionSchema = z.enum(["baru", "bekas"]) satisfies z.ZodType<ProductCondition>
+export const productStatusSchema = z.enum(["active", "inactive"]) satisfies z.ZodType<ProductStatus>
+
+export const adminCreateProductSchema = z.object({
+  title: z.string().trim().min(2, "Minimal 2 karakter").max(200, "Maksimal 200 karakter"),
+  user_id: z.string().uuid("User ID tidak valid"),
+  condition: productConditionSchema,
+  price: z.coerce.number().min(0, "Harga tidak boleh negatif"),
+  stock: z.coerce.number().int().min(0, "Stok tidak boleh negatif").default(0),
+  status: productStatusSchema.optional(),
+  photo_urls: z.array(z.string().url()).max(10).optional(),
+})
+
+export const adminUpdateProductSchema = z
+  .object({
+    title: z.string().trim().min(2).max(200).optional(),
+    user_id: z.string().uuid().optional(),
+    condition: productConditionSchema.optional(),
+    price: z.coerce.number().min(0).optional(),
+    stock: z.coerce.number().int().min(0).optional(),
+    status: productStatusSchema.optional(),
+    photo_urls: z.array(z.string().url()).max(10).nullable().optional(),
+  })
+  .refine((data) => Object.keys(data).length > 0, {
+    message: "Tidak ada data yang diubah",
+  })
+
+export const productQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(100).default(10),
+  page: z.coerce.number().int().min(1).default(1),
+  q: z.string().trim().min(1).max(200).optional(),
+  sortBy: z.enum(["created_at", "title", "price"]).default("created_at"),
+  order: z.enum(["asc", "desc"]).default("desc"),
+  status: productStatusSchema.optional(),
+  userId: z.string().uuid().optional(),
+})
+
 export type LoginInput = z.infer<typeof loginSchema>
 export type RegisterInput = z.infer<typeof registerSchema>
 export type ProfileUpdateInput = z.infer<typeof profileUpdateSchema>
@@ -110,3 +149,6 @@ export type AdminUpdateUserInput = z.infer<typeof adminUpdateUserSchema>
 export type PasswordUpdateInput = z.infer<typeof passwordUpdateSchema>
 export type UserQueryInput = z.infer<typeof userQuerySchema>
 export type DonationInput = z.infer<typeof donationSchema>
+export type AdminCreateProductInput = z.infer<typeof adminCreateProductSchema>
+export type AdminUpdateProductInput = z.infer<typeof adminUpdateProductSchema>
+export type ProductQueryInput = z.infer<typeof productQuerySchema>

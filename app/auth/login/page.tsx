@@ -32,8 +32,8 @@ export default function LoginPage() {
 
   const redirectTarget = (() => {
     const redirect = searchParams.get("redirect")
-    if (!redirect) return "/account"
-    return redirect.startsWith("/") ? redirect : "/account"
+    if (!redirect) return "/admin"
+    return redirect.startsWith("/") ? redirect : "/admin"
   })()
 
   const handleSubmit = async (values: LoginInput) => {
@@ -149,12 +149,8 @@ export default function LoginPage() {
                   )}
                 </Button>
 
-                <div className="flex items-center justify-end text-sm">
-                  <Link href="/auth/register" className="font-medium text-white hover:underline">
-                    Belum punya akun?
-                  </Link>
-                </div>
-                
+
+
                 <div className="flex items-center justify-center text-sm">
                   <Link href="/" className="font-medium text-white hover:underline">
                     Kembali ke beranda

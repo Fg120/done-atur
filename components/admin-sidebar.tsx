@@ -11,6 +11,7 @@ import {
   LogOut,
   Menu,
   X,
+  Package,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
@@ -34,6 +35,11 @@ export function AdminSidebar({ userEmail }: AdminSidebarProps) {
       icon: Gift,
       label: "Donasi",
       href: "/admin/donations",
+    },
+    {
+      icon: Package,
+      label: "Produk",
+      href: "/admin/products",
     },
     {
       icon: Users,

@@ -1,6 +1,8 @@
 export type UserRole = "admin" | "seller" | "user"
 export type DonationType = "uang" | "pakaian"
 export type DonationStatus = "pending" | "approved" | "rejected" | "completed"
+export type ProductCondition = "baru" | "bekas"
+export type ProductStatus = "active" | "inactive"
 
 export interface ProfilesTable {
   Row: {
@@ -84,11 +86,49 @@ export interface Database {
     Tables: {
       profiles: ProfilesTable
       donations: DonationsTable
+      products: ProductsTable
     }
     Views: Record<string, never>
     Functions: Record<string, never>
     Enums: {
       user_role: UserRole
     }
+  }
+}
+
+export interface ProductsTable {
+  Row: {
+    id: string
+    user_id: string
+    title: string
+    condition: ProductCondition
+    price: number
+    stock: number
+    status: ProductStatus
+    photo_urls: string[] | null
+    created_at: string | null
+    updated_at: string | null
+  }
+  Insert: {
+    user_id: string
+    title: string
+    condition: ProductCondition
+    price: number
+    stock?: number
+    status?: ProductStatus
+    photo_urls?: string[] | null
+    created_at?: string
+    updated_at?: string
+  }
+  Update: {
+    user_id?: string
+    title?: string
+    condition?: ProductCondition
+    price?: number
+    stock?: number
+    status?: ProductStatus
+    photo_urls?: string[] | null
+    created_at?: string
+    updated_at?: string
   }
 }
