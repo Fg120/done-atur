@@ -10,7 +10,10 @@
 -- ============================================================================
 
 -- Create user role enum type
-CREATE TYPE user_role AS ENUM ('admin', 'seller', 'user');
+DO $$ BEGIN
+    CREATE TYPE user_role AS ENUM ('admin', 'seller', 'user');
+EXCEPTION WHEN duplicate_object THEN null;
+END $$;
 
 -- ============================================================================
 -- TABLES
@@ -19,7 +22,7 @@ CREATE TYPE user_role AS ENUM ('admin', 'seller', 'user');
 -- Table: profiles
 -- Description: Stores user profile information including authentication details and role
 -- Prefix: t_ (table prefix for consistent naming convention)
-CREATE TABLE profiles (
+CREATE TABLE IF NOT EXISTS profiles (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     email TEXT NOT NULL UNIQUE,
     full_name TEXT,
@@ -33,76 +36,48 @@ CREATE TABLE profiles (
 -- ============================================================================
 
 -- Index for faster email lookups
-CREATE INDEX idx_profiles_email ON profiles(email);
+CREATE INDEX IF NOT EXISTS idx_profiles_email ON profiles(email);
 
 -- Index for role-based queries
-CREATE INDEX idx_profiles_role ON profiles(role);
+CREATE INDEX IF NOT EXISTS idx_profiles_role ON profiles(role);
 
 -- Index for created_at for sorting and filtering
-CREATE INDEX idx_profiles_created_at ON profiles(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_profiles_created_at ON profiles(created_at DESC);
 
 -- ============================================================================
 -- ROW LEVEL SECURITY (RLS) POLICIES
 -- ============================================================================
 
 -- Enable RLS on profiles table
-ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS profiles ENABLE ROW LEVEL SECURITY;
 
--- Policy: Allow users to read their own profile
-CREATE POLICY "Users can view own profile"
+-- HAPUS SEMUA POLICY LAMA
+DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
+DROP POLICY IF EXISTS "Service role full access" ON profiles;
+DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
+DROP POLICY IF EXISTS "Admins can view all profiles" ON profiles;
+DROP POLICY IF EXISTS "Service role can do anything" ON profiles;
+
+-- CREATE ULANG DENGAN SIMPLE LOGIC (NO RECURSION)
+-- Policy 1: Everyone can view their own profile
+CREATE POLICY "view_own_profile"
     ON profiles
     FOR SELECT
     USING (auth.uid() = id);
 
--- Policy: Allow users to update their own profile (except role)
-CREATE POLICY "Users can update own profile"
+-- Policy 2: Everyone can update their own profile
+CREATE POLICY "update_own_profile"
     ON profiles
     FOR UPDATE
     USING (auth.uid() = id)
-    WITH CHECK (
-        auth.uid() = id 
-        AND role = (SELECT role FROM profiles WHERE id = auth.uid())
-    );
+    WITH CHECK (auth.uid() = id);
 
--- Policy: Allow admins to view all profiles
-CREATE POLICY "Admins can view all profiles"
+-- Policy 3: Service role bypass (for backend only)
+CREATE POLICY "service_role_bypass"
     ON profiles
-    FOR SELECT
-    USING (
-        EXISTS (
-            SELECT 1 FROM profiles
-            WHERE id = auth.uid() AND role = 'admin'
-        )
-    );
-
--- Policy: Allow admins to update any profile
-CREATE POLICY "Admins can update all profiles"
-    ON profiles
-    FOR UPDATE
-    USING (
-        EXISTS (
-            SELECT 1 FROM profiles
-            WHERE id = auth.uid() AND role = 'admin'
-        )
-    );
-
--- Policy: Allow admins to delete users (except themselves)
-CREATE POLICY "Admins can delete other profiles"
-    ON profiles
-    FOR DELETE
-    USING (
-        EXISTS (
-            SELECT 1 FROM profiles
-            WHERE id = auth.uid() AND role = 'admin'
-        )
-        AND id != auth.uid()
-    );
-
--- Policy: Allow service role to insert new profiles
-CREATE POLICY "Service role can insert profiles"
-    ON profiles
-    FOR INSERT
-    WITH CHECK (true);
+    FOR ALL
+    USING (auth.role() = 'service_role');
 
 -- ============================================================================
 -- TRIGGERS
@@ -118,6 +93,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Trigger: Update updated_at on profiles changes
+DROP TRIGGER IF EXISTS set_updated_at ON profiles;
 CREATE TRIGGER set_updated_at
     BEFORE UPDATE ON profiles
     FOR EACH ROW
@@ -144,6 +120,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Trigger: Create profile when new user signs up
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
     AFTER INSERT ON auth.users
     FOR EACH ROW
@@ -163,6 +140,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Trigger: Sync email on auth.users update
+DROP TRIGGER IF EXISTS on_auth_user_email_updated ON auth.users;
 CREATE TRIGGER on_auth_user_email_updated
     AFTER UPDATE ON auth.users
     FOR EACH ROW
@@ -173,30 +151,8 @@ CREATE TRIGGER on_auth_user_email_updated
 -- HELPER FUNCTIONS
 -- ============================================================================
 
--- Function: Check if current user is admin
-CREATE OR REPLACE FUNCTION is_admin()
-RETURNS BOOLEAN AS $$
-BEGIN
-    RETURN EXISTS (
-        SELECT 1 FROM profiles
-        WHERE id = auth.uid() AND role = 'admin'
-    );
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- Function: Get current user's role
-CREATE OR REPLACE FUNCTION get_current_user_role()
-RETURNS user_role AS $$
-DECLARE
-    user_role_val user_role;
-BEGIN
-    SELECT role INTO user_role_val
-    FROM profiles
-    WHERE id = auth.uid();
-    
-    RETURN user_role_val;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+-- NO HELPER FUNCTIONS - CAUSES RECURSION
+-- Use service_role for admin checks instead
 
 -- ============================================================================
 -- GRANTS
@@ -211,13 +167,6 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON profiles TO anon, authenticated, service
 -- Grant access to sequences (if any are added later)
 GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated, service_role;
 
--- Grant execute on functions
-GRANT EXECUTE ON FUNCTION handle_updated_at() TO anon, authenticated, service_role;
-GRANT EXECUTE ON FUNCTION handle_new_user() TO anon, authenticated, service_role;
-GRANT EXECUTE ON FUNCTION handle_user_email_change() TO anon, authenticated, service_role;
-GRANT EXECUTE ON FUNCTION is_admin() TO authenticated, service_role;
-GRANT EXECUTE ON FUNCTION get_current_user_role() TO authenticated, service_role;
-
 -- ============================================================================
 -- COMMENTS
 -- ============================================================================
@@ -229,12 +178,6 @@ COMMENT ON COLUMN profiles.full_name IS 'Display name of the user';
 COMMENT ON COLUMN profiles.role IS 'User role: admin, seller, or user';
 COMMENT ON COLUMN profiles.created_at IS 'Timestamp when profile was created';
 COMMENT ON COLUMN profiles.updated_at IS 'Timestamp of last profile update, auto-updated by trigger';
-
-COMMENT ON FUNCTION handle_new_user() IS 'Automatically creates profile entry when new user signs up via auth.users';
-COMMENT ON FUNCTION handle_user_email_change() IS 'Syncs email changes from auth.users to profiles';
-COMMENT ON FUNCTION handle_updated_at() IS 'Updates the updated_at timestamp on row modification';
-COMMENT ON FUNCTION is_admin() IS 'Returns true if current authenticated user has admin role';
-COMMENT ON FUNCTION get_current_user_role() IS 'Returns the role of the current authenticated user';
 
 -- ============================================================================
 -- END OF MIGRATION
