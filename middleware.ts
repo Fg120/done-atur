@@ -19,6 +19,14 @@ function getSupabaseAnonKey() {
   return key
 }
 
+function getSupabaseServiceKey() {
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!key) {
+    throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY")
+  }
+  return key
+}
+
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
   const requiresAuth = pathname.startsWith("/account") || pathname.startsWith("/admin")
@@ -65,7 +73,25 @@ export async function middleware(request: NextRequest) {
     return response
   }
 
-  const { data: profile, error: profileError } = await supabase
+  // Use service role key to check admin status (bypasses RLS)
+  const supabaseService = createServerClient<Database>(
+    getSupabaseUrl(),
+    getSupabaseServiceKey(),
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            response.cookies.set(name, value, options)
+          })
+        },
+      },
+    }
+  )
+
+  const { data: profile, error: profileError } = await supabaseService
     .from("profiles")
     .select("role")
     .eq("id", session.user.id)
@@ -75,7 +101,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url))
   }
 
-  if (!profile || profile.role !== "admin") {
+  if (!profile || (profile as any).role !== "admin") {
     return NextResponse.redirect(new URL("/", request.url))
   }
 
