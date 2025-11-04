@@ -160,7 +160,9 @@ export default function AdminProductsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: values.title.trim(),
+          description: values.description?.trim() || undefined,
           user_id: values.user_id,
+          category: values.category,
           condition: values.condition,
           price: values.price,
           stock: values.stock,

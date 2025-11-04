@@ -88,6 +88,7 @@ export interface Database {
       profiles: ProfilesTable
       donations: DonationsTable
       products: ProductsTable
+      accountability: AccountabilityTable
     }
     Views: Record<string, never>
     Functions: Record<string, never>
@@ -135,6 +136,40 @@ export interface ProductsTable {
     stock?: number
     status?: ProductStatus
     photo_urls?: string[] | null
+    created_at?: string
+    updated_at?: string
+  }
+}
+
+export interface AccountabilityTable {
+  Row: {
+    id: string
+    location: string
+    activity_date: string
+    description: string
+    donation_ids: string[]
+    photo_urls: string[] | null
+    created_by: string
+    created_at: string
+    updated_at: string
+  }
+  Insert: {
+    location: string
+    activity_date: string
+    description: string
+    donation_ids: string[]
+    photo_urls?: string[] | null
+    created_by: string
+    created_at?: string
+    updated_at?: string
+  }
+  Update: {
+    location?: string
+    activity_date?: string
+    description?: string
+    donation_ids?: string[]
+    photo_urls?: string[] | null
+    created_by?: string
     created_at?: string
     updated_at?: string
   }

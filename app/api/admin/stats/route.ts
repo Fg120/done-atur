@@ -14,18 +14,38 @@ export async function GET(request: NextRequest) {
 
     const supabase = createSupabaseServerClient()
 
-    // Get donations stats
+    // Get all donations
     const { data: donations, error: donationsError } = await supabase
       .from("donations")
       .select("id, donation_type, nominal, net_amount, status, donor_email")
 
     if (donationsError) throw donationsError
 
+    // Get all accountability records to identify verified donations
+    const { data: accountabilities, error: accountError } = await supabase
+      .from("accountability")
+      .select("donation_ids")
+
+    if (accountError) throw accountError
+
+    // Flatten all verified donation IDs
+    const verifiedDonationIds = new Set<string>()
+    accountabilities?.forEach((record: any) => {
+      if (record.donation_ids && Array.isArray(record.donation_ids)) {
+        record.donation_ids.forEach((id: string) => verifiedDonationIds.add(id))
+      }
+    })
+
+    // Separate donations into verified and pending
+    const verifiedDonations = donations?.filter((d: any) => verifiedDonationIds.has(d.id)) || []
+    const pendingVerification = donations?.filter((d: any) => !verifiedDonationIds.has(d.id)) || []
+
     // Calculate statistics
     const stats = {
       totalDonations: donations?.length || 0,
       totalDonors: new Set(donations?.map((d: any) => d.donor_email).filter(Boolean)).size || 0,
-      totalAmount: donations?.reduce((sum: number, d: any) => sum + (d.net_amount || 0), 0) || 0,
+      verifiedAmount: verifiedDonations.reduce((sum: number, d: any) => sum + (d.net_amount || 0), 0) || 0,
+      pendingAmount: pendingVerification.reduce((sum: number, d: any) => sum + (d.net_amount || 0), 0) || 0,
       pendingDonations: donations?.filter((d: any) => d.status === "pending").length || 0,
       approvedDonations: donations?.filter((d: any) => d.status === "approved").length || 0,
       rejectedDonations: donations?.filter((d: any) => d.status === "rejected").length || 0,

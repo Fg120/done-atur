@@ -145,6 +145,27 @@ export const productQuerySchema = z.object({
   userId: z.string().uuid().optional(),
 })
 
+// Accountability
+export const adminCreateAccountabilitySchema = z.object({
+  location: z.string().trim().min(2, "Minimal 2 karakter").max(200, "Maksimal 200 karakter"),
+  activity_date: z.string().refine((date) => !isNaN(Date.parse(date)), "Tanggal tidak valid"),
+  description: z.string().trim().min(5, "Minimal 5 karakter").max(2000, "Maksimal 2000 karakter"),
+  donation_ids: z.array(z.string().uuid()).min(1, "Minimal pilih 1 donasi"),
+  photo_urls: z.array(z.string().url()).max(10, "Maksimal 10 foto").optional(),
+})
+
+export const adminUpdateAccountabilitySchema = z
+  .object({
+    location: z.string().trim().min(2).max(200).optional(),
+    activity_date: z.string().refine((date) => !isNaN(Date.parse(date)), "Tanggal tidak valid").optional(),
+    description: z.string().trim().min(5).max(2000).optional(),
+    donation_ids: z.array(z.string().uuid()).min(1).optional(),
+    photo_urls: z.array(z.string().url()).max(10).optional(),
+  })
+  .refine((data) => Object.keys(data).length > 0, {
+    message: "Tidak ada data yang diubah",
+  })
+
 export type LoginInput = z.infer<typeof loginSchema>
 export type RegisterInput = z.infer<typeof registerSchema>
 export type ProfileUpdateInput = z.infer<typeof profileUpdateSchema>
@@ -156,3 +177,5 @@ export type DonationInput = z.infer<typeof donationSchema>
 export type AdminCreateProductInput = z.infer<typeof adminCreateProductSchema>
 export type AdminUpdateProductInput = z.infer<typeof adminUpdateProductSchema>
 export type ProductQueryInput = z.infer<typeof productQuerySchema>
+export type AdminCreateAccountabilityInput = z.infer<typeof adminCreateAccountabilitySchema>
+export type AdminUpdateAccountabilityInput = z.infer<typeof adminUpdateAccountabilitySchema>

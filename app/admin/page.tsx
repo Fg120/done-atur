@@ -8,7 +8,8 @@ import { Loader2, Users, Gift, TrendingUp, Calendar } from "lucide-react"
 interface DashboardStats {
   totalDonations: number
   totalDonors: number
-  totalAmount: number
+  verifiedAmount: number
+  pendingAmount: number
   pendingDonations: number
   approvedDonations: number
   rejectedDonations: number
@@ -20,7 +21,8 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats>({
     totalDonations: 0,
     totalDonors: 0,
-    totalAmount: 0,
+    verifiedAmount: 0,
+    pendingAmount: 0,
     pendingDonations: 0,
     approvedDonations: 0,
     rejectedDonations: 0,
@@ -82,15 +84,15 @@ export default function AdminDashboard() {
         />
         <StatCard
           icon={TrendingUp}
-          label="Total Nominal"
-          value={`Rp ${(stats.totalAmount || 0).toLocaleString("id-ID")}`}
-          description="Total uang yang diterima"
+          label="Saldo Terverifikasi"
+          value={`Rp ${(stats.verifiedAmount || 0).toLocaleString("id-ID")}`}
+          description="Sudah masuk pertanggungjawaban"
         />
         <StatCard
           icon={Calendar}
-          label="Donasi Pending"
-          value={stats.pendingDonations}
-          description="Menunggu konfirmasi"
+          label="Saldo Pending"
+          value={`Rp ${(stats.pendingAmount || 0).toLocaleString("id-ID")}`}
+          description="Belum dipertanggungjawabkan"
         />
         <StatCard
           icon={Users}

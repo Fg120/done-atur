@@ -10,11 +10,32 @@ export const dynamic = "force-dynamic"
 
 export async function GET() {
   try {
-    // Fetch approved donations only for public statistics
+    // Fetch all accountability records to get donations that are reported
+    const { data: accountabilities, error: accountError } = await supabase
+      .from("accountability")
+      .select("donation_ids")
+
+    if (accountError) {
+      console.error("Accountability fetch error:", accountError)
+      return NextResponse.json(
+        { error: "Gagal mengambil data pertanggungjawaban" },
+        { status: 500 }
+      )
+    }
+
+    // Flatten all donation IDs from accountability records
+    const reportedDonationIds = new Set<string>()
+    accountabilities?.forEach((record: any) => {
+      if (record.donation_ids && Array.isArray(record.donation_ids)) {
+        record.donation_ids.forEach((id: string) => reportedDonationIds.add(id))
+      }
+    })
+
+    // Fetch only donations that are included in accountability records
     const { data: donations, error: donationsError } = await supabase
       .from("donations")
       .select("id, donation_type, nominal, net_amount, status, donor_email")
-      .eq("status", "approved")
+      .in("id", Array.from(reportedDonationIds))
 
     if (donationsError) {
       console.error("Donations fetch error:", donationsError)
@@ -24,7 +45,7 @@ export async function GET() {
       )
     }
 
-    // Calculate statistics from approved donations
+    // Calculate statistics from donations in accountability
     const stats = {
       totalAmount: donations?.reduce((sum: number, d: any) => sum + (d.net_amount || 0), 0) || 0,
       clothesDonations: donations?.filter((d: any) => d.donation_type === "pakaian").length || 0,
