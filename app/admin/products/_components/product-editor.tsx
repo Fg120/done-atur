@@ -28,7 +28,9 @@ interface ProductDetail {
   id: string
   user_id: string
   title: string
-  condition: 'baru' | 'bekas'
+  description: string | null
+  category: 'pria' | 'wanita' | 'anak'
+  condition: 'baru' | 'preloved'
   price: number
   stock: number
   status: 'active' | 'inactive'
@@ -57,6 +59,8 @@ export function ProductEditor({ product }: ProductEditorProps) {
     resolver: zodResolver(adminUpdateProductSchema),
     defaultValues: {
       title: product.title,
+      description: product.description || '',
+      category: product.category,
       condition: product.condition,
       price: product.price,
       stock: product.stock,
@@ -172,6 +176,49 @@ export function ProductEditor({ product }: ProductEditorProps) {
               )}
             />
 
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Deskripsi</FormLabel>
+                  <FormControl>
+                    <textarea
+                      placeholder="Deskripsi produk"
+                      disabled={isSaving || isDeleting}
+                      className="min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      {...field}
+                      value={field.value || ''}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Kategori</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange} disabled={isSaving || isDeleting}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Pilih kategori" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="pria">Pria</SelectItem>
+                      <SelectItem value="wanita">Wanita</SelectItem>
+                      <SelectItem value="anak">Anak</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -187,7 +234,7 @@ export function ProductEditor({ product }: ProductEditorProps) {
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="baru">Baru</SelectItem>
-                        <SelectItem value="bekas">Bekas</SelectItem>
+                        <SelectItem value="preloved">Preloved</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

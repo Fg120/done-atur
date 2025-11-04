@@ -18,12 +18,12 @@ export function DonationSection() {
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
-    nama: "test",
-    email: "test@gmail.com",
-    nomorHp: "0123456789",
-    jenisDonasi: "uang",
-    nominal: "100000",
-    metodePembayaran: "transfer",
+    nama: "",
+    email: "",
+    nomorHp: "",
+    jenisDonasi: "",
+    nominal: "",
+    metodePembayaran: "",
     buktiTransfer: null as File | null,
     daftarPakaian: "",
     alamatPenjemputan: "",
@@ -42,7 +42,7 @@ export function DonationSection() {
       if (formData.jenisDonasi === "uang" && formData.buktiTransfer) {
         // Generate temporary ID for upload
         const tempId = `donation-${Date.now()}`
-        
+
         // Upload via API route
         const uploadFormData = new FormData()
         uploadFormData.append("file", formData.buktiTransfer)

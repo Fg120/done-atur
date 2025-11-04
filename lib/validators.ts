@@ -1,7 +1,7 @@
 import { z } from "zod"
 
 import type { UserRole } from "@/types/database"
-import type { ProductCondition, ProductStatus } from "@/types/database"
+import type { ProductCategory, ProductCondition, ProductStatus } from "@/types/database"
 
 export const userRoleSchema = z.enum(["admin", "seller", "user"]) satisfies z.ZodType<UserRole>
 
@@ -104,12 +104,15 @@ export const donationSchema = z.object({
   )
 
 // Products
-export const productConditionSchema = z.enum(["baru", "bekas"]) satisfies z.ZodType<ProductCondition>
+export const productCategorySchema = z.enum(["pria", "wanita", "anak"]) satisfies z.ZodType<ProductCategory>
+export const productConditionSchema = z.enum(["baru", "preloved"]) satisfies z.ZodType<ProductCondition>
 export const productStatusSchema = z.enum(["active", "inactive"]) satisfies z.ZodType<ProductStatus>
 
 export const adminCreateProductSchema = z.object({
   title: z.string().trim().min(2, "Minimal 2 karakter").max(200, "Maksimal 200 karakter"),
+  description: z.string().trim().max(1000, "Maksimal 1000 karakter").optional(),
   user_id: z.string().uuid("User ID tidak valid"),
+  category: productCategorySchema,
   condition: productConditionSchema,
   price: z.coerce.number().min(0, "Harga tidak boleh negatif"),
   stock: z.coerce.number().int().min(0, "Stok tidak boleh negatif").default(0),
@@ -120,6 +123,7 @@ export const adminCreateProductSchema = z.object({
 export const adminUpdateProductSchema = z
   .object({
     title: z.string().trim().min(2).max(200).optional(),
+    description: z.string().trim().max(1000).optional(),
     user_id: z.string().uuid().optional(),
     condition: productConditionSchema.optional(),
     price: z.coerce.number().min(0).optional(),

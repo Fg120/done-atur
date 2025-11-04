@@ -1,7 +1,8 @@
 export type UserRole = "admin" | "seller" | "user"
 export type DonationType = "uang" | "pakaian"
 export type DonationStatus = "pending" | "approved" | "rejected" | "completed"
-export type ProductCondition = "baru" | "bekas"
+export type ProductCategory = "pria" | "wanita" | "anak"
+export type ProductCondition = "baru" | "preloved"
 export type ProductStatus = "active" | "inactive"
 
 export interface ProfilesTable {
@@ -101,6 +102,8 @@ export interface ProductsTable {
     id: string
     user_id: string
     title: string
+    description: string | null
+    category: ProductCategory
     condition: ProductCondition
     price: number
     stock: number
@@ -112,6 +115,8 @@ export interface ProductsTable {
   Insert: {
     user_id: string
     title: string
+    description?: string | null
+    category: ProductCategory
     condition: ProductCondition
     price: number
     stock?: number
@@ -123,6 +128,8 @@ export interface ProductsTable {
   Update: {
     user_id?: string
     title?: string
+    description?: string | null
+    category?: ProductCategory
     condition?: ProductCondition
     price?: number
     stock?: number
