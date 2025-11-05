@@ -10,12 +10,20 @@ interface DashboardStats {
   totalDonors: number
   pendingAmount: number
   verifiedAmount: number
+  distributedAmount: number
   rejectedAmount: number
   pendingDonations: number
   approvedDonations: number
+  distributedDonations: number
   rejectedDonations: number
   moneyDonations: number
   clothesDonations: number
+  clothingPending: number
+  clothingVerified: number
+  clothingDistributed: number
+  clothingRejected: number
+  moneyDonationsCount: number
+  clothesDonationsCount: number
 }
 
 export default function AdminDashboard() {
@@ -24,12 +32,20 @@ export default function AdminDashboard() {
     totalDonors: 0,
     pendingAmount: 0,
     verifiedAmount: 0,
+    distributedAmount: 0,
     rejectedAmount: 0,
     pendingDonations: 0,
     approvedDonations: 0,
+    distributedDonations: 0,
     rejectedDonations: 0,
     moneyDonations: 0,
     clothesDonations: 0,
+    clothingPending: 0,
+    clothingVerified: 0,
+    clothingDistributed: 0,
+    clothingRejected: 0,
+    moneyDonationsCount: 0,
+    clothesDonationsCount: 0,
   })
   const [loading, setLoading] = useState(true)
 
@@ -88,20 +104,60 @@ export default function AdminDashboard() {
           icon={Calendar}
           label="Saldo Pending"
           value={`Rp ${(stats.pendingAmount || 0).toLocaleString("id-ID")}`}
-          description="Menunggu persetujuan (status pending)"
+          description="Status menunggu (pending)"
         />
         <StatCard
           icon={TrendingUp}
           label="Saldo Terverifikasi"
           value={`Rp ${(stats.verifiedAmount || 0).toLocaleString("id-ID")}`}
-          description="Approved + masuk pertanggungjawaban"
+          description="Status disetujui (approved)"
+        />
+        <StatCard
+          icon={Gift}
+          label="Saldo Tersalurkan"
+          value={`Rp ${(stats.distributedAmount || 0).toLocaleString("id-ID")}`}
+          description="Sudah masuk pertanggungjawaban"
         />
         <StatCard
           icon={Gift}
           label="Saldo Ditolak"
           value={`Rp ${(stats.rejectedAmount || 0).toLocaleString("id-ID")}`}
-          description="Donasi dengan status rejected"
+          description="Status ditolak (rejected)"
         />
+      </div>
+
+      {/* Pakaian Statistics */}
+      <div className="space-y-4">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Statistik Pakaian</h2>
+          <p className="text-muted-foreground">Breakdown donasi pakaian berdasarkan status</p>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <StatCard
+            icon={Calendar}
+            label="Pakaian Pending"
+            value={stats.clothingPending}
+            description="Status menunggu (pending)"
+          />
+          <StatCard
+            icon={TrendingUp}
+            label="Pakaian Terverifikasi"
+            value={stats.clothingVerified}
+            description="Status disetujui (approved)"
+          />
+          <StatCard
+            icon={Gift}
+            label="Pakaian Tersalurkan"
+            value={stats.clothingDistributed}
+            description="Sudah masuk pertanggungjawaban"
+          />
+          <StatCard
+            icon={Gift}
+            label="Pakaian Ditolak"
+            value={stats.clothingRejected}
+            description="Status ditolak (rejected)"
+          />
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">

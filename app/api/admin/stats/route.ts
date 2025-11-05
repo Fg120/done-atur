@@ -21,42 +21,76 @@ export async function GET(request: NextRequest) {
 
     if (donationsError) throw donationsError
 
-    // Get all accountability records to identify verified donations
+    // Get all accountability records to identify distributed donations
     const { data: accountabilities, error: accountError } = await supabase
       .from("accountability")
       .select("donation_ids")
 
     if (accountError) throw accountError
 
-    // Flatten all verified donation IDs (dari accountability)
-    const verifiedDonationIds = new Set<string>()
+    // Flatten all distributed donation IDs (dari accountability)
+    const distributedDonationIds = new Set<string>()
     accountabilities?.forEach((record: any) => {
       if (record.donation_ids && Array.isArray(record.donation_ids)) {
-        record.donation_ids.forEach((id: string) => verifiedDonationIds.add(id))
+        record.donation_ids.forEach((id: string) => distributedDonationIds.add(id))
       }
     })
 
     // Donasi dengan status "pending" (menunggu persetujuan)
     const pendingStatusDonations = donations?.filter((d: any) => d.status === "pending") || []
 
-    // Donasi approved yang masuk di pertanggungjawaban (verified)
-    const verifiedDonations = donations?.filter((d: any) => d.status === "approved" && verifiedDonationIds.has(d.id)) || []
+    // Donasi dengan status "approved" (sudah disetujui/terverifikasi)
+    const approvedDonations = donations?.filter((d: any) => d.status === "approved") || []
+
+    // Donasi approved yang masuk di accountability (sudah disalurkan)
+    const distributedDonations = donations?.filter((d: any) => d.status === "approved" && distributedDonationIds.has(d.id)) || []
 
     // Donasi rejected
     const rejectedDonations = donations?.filter((d: any) => d.status === "rejected") || []
 
+    // Pisahkan money dan clothing donations untuk setiap status
+    const moneyDonations = donations?.filter((d: any) => d.donation_type === "uang") || []
+    const clothingDonations = donations?.filter((d: any) => d.donation_type === "pakaian") || []
+
+    // Money donations breakdown
+    const moneyPending = moneyDonations.filter((d: any) => d.status === "pending") || []
+    const moneyApproved = moneyDonations.filter((d: any) => d.status === "approved") || []
+    const moneyDistributed = moneyDonations.filter((d: any) => d.status === "approved" && distributedDonationIds.has(d.id)) || []
+    const moneyRejected = moneyDonations.filter((d: any) => d.status === "rejected") || []
+
+    // Clothing donations breakdown
+    const clothingPending = clothingDonations.filter((d: any) => d.status === "pending") || []
+    const clothingApproved = clothingDonations.filter((d: any) => d.status === "approved") || []
+    const clothingDistributed = clothingDonations.filter((d: any) => d.status === "approved" && distributedDonationIds.has(d.id)) || []
+    const clothingRejected = clothingDonations.filter((d: any) => d.status === "rejected") || []
+
     // Calculate statistics
     const stats = {
+      // Overall totals
       totalDonations: donations?.length || 0,
       totalDonors: new Set(donations?.map((d: any) => d.donor_email).filter(Boolean)).size || 0,
-      pendingAmount: pendingStatusDonations.reduce((sum: number, d: any) => sum + (d.net_amount || 0), 0) || 0,
-      verifiedAmount: verifiedDonations.reduce((sum: number, d: any) => sum + (d.net_amount || 0), 0) || 0,
-      rejectedAmount: rejectedDonations.reduce((sum: number, d: any) => sum + (d.net_amount || 0), 0) || 0,
-      pendingDonations: pendingStatusDonations.length || 0,
-      approvedDonations: donations?.filter((d: any) => d.status === "approved").length || 0,
-      rejectedDonations: rejectedDonations.length || 0,
-      moneyDonations: donations?.filter((d: any) => d.donation_type === "uang").length || 0,
-      clothesDonations: donations?.filter((d: any) => d.donation_type === "pakaian").length || 0,
+      
+      // Money donations (Uang)
+      pendingAmount: moneyPending.reduce((sum: number, d: any) => sum + (d.net_amount || 0), 0) || 0,
+      verifiedAmount: moneyApproved.reduce((sum: number, d: any) => sum + (d.net_amount || 0), 0) || 0,
+      distributedAmount: moneyDistributed.reduce((sum: number, d: any) => sum + (d.net_amount || 0), 0) || 0,
+      rejectedAmount: moneyRejected.reduce((sum: number, d: any) => sum + (d.net_amount || 0), 0) || 0,
+      
+      // Money donation counts
+      pendingDonations: moneyPending.length || 0,
+      approvedDonations: moneyApproved.length || 0,
+      distributedDonations: moneyDistributed.length || 0,
+      rejectedDonations: moneyRejected.length || 0,
+      
+      // Type counts
+      moneyDonationsCount: moneyDonations.length || 0,
+      clothesDonationsCount: clothingDonations.length || 0,
+      
+      // Clothing donations statistics (4 tiers like money)
+      clothingPending: clothingPending.length || 0,
+      clothingVerified: clothingApproved.length || 0,
+      clothingDistributed: clothingDistributed.length || 0,
+      clothingRejected: clothingRejected.length || 0,
     }
 
     return NextResponse.json(stats)

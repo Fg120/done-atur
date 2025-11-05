@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS donations (
   
   -- For clothing donations
   clothing_list TEXT,
+  quantity INT,
   pickup_address TEXT,
   
   -- Common fields

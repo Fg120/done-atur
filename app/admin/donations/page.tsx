@@ -30,6 +30,7 @@ interface Donation {
   payment_method: string | null
   transfer_proof_url: string | null
   clothing_list: string | null
+  quantity: number | null
   pickup_address: string | null
   notes: string | null
   is_anonymous: boolean
@@ -432,6 +433,12 @@ export default function DonationsPage() {
               ) : (
                 <div className="space-y-3 pb-4 border-b">
                   <h4 className="font-semibold">Detail Donasi Pakaian</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Jumlah Pakaian</p>
+                      <p className="font-medium text-lg">{selectedDonation.quantity || 0} pcs</p>
+                    </div>
+                  </div>
                   <div>
                     <p className="text-sm text-muted-foreground mb-2">Daftar Pakaian</p>
                     <p className="text-sm whitespace-pre-wrap bg-secondary/30 p-3 rounded-lg">
