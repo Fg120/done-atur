@@ -258,6 +258,23 @@ export function DonationSection() {
             {formData.jenisDonasi === "uang" && (
               <>
                 <div className="space-y-2">
+                  <Card className="rounded-xl border border-border bg-[#F8FDF9] p-8 shadow-2xl shadow-slate-800/50">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                        <Info className="w-6 h-6 text-primary" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-xl font-semibold text-foreground mb-4">Metode Pembayaran</h3>
+                        <div className="space-y-4 text-muted-foreground">
+                          <h4 className="font-medium text-foreground mb-2">Bank Mandiri 1430028736856 (a/n CINDY AULIA ANDRIANI)</h4>
+                          <h4 className="font-medium text-foreground mb-2">ShopeePay 085730211766 (a/n Cindy Aulia Andriani)</h4>
+                          <h4 className="font-medium text-foreground mb-2">GoPay 085730211766 (a/n Cindy Aulia Andriani)</h4>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor="nominal">Nominal Donasi</Label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">Rp</span>
