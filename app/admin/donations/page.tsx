@@ -9,8 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
 import { useLoaderFade } from "@/hooks/use-loader-fade"
-import { getDonations, updateDonationStatus, deleteDonation } from "@/lib/donations"
-import { Loader2, Trash2, Eye, FileText, Image as ImageIcon } from "lucide-react"
+import { getDonations, updateDonationStatus, deleteDonation, updateDonation } from "@/lib/donations"
+import { Loader2, Trash2, Eye, FileText, Image as ImageIcon, Pencil } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -18,6 +18,8 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog"
+import { Textarea } from "@/components/ui/textarea"
+import { Checkbox } from "@/components/ui/checkbox"
 
 interface Donation {
   id: string
@@ -49,6 +51,9 @@ export default function DonationsPage() {
   const [selectedDonation, setSelectedDonation] = useState<Donation | null>(null)
   const [showDetailDialog, setShowDetailDialog] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
+  const [showEditDialog, setShowEditDialog] = useState(false)
+  const [editFormData, setEditFormData] = useState<Partial<Donation>>({})
+  const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
     loadDonations()
@@ -149,6 +154,75 @@ export default function DonationsPage() {
         description: error instanceof Error ? error.message : "Terjadi kesalahan",
         variant: "destructive",
       })
+    }
+  }
+
+  const handleEdit = (donation: Donation) => {
+    setEditFormData(donation)
+    setShowEditDialog(true)
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editFormData.id) return
+
+    setIsSaving(true)
+    try {
+      const updateData: any = {
+        donor_name: editFormData.donor_name,
+        donor_email: editFormData.donor_email,
+        donor_phone: editFormData.donor_phone,
+        is_anonymous: editFormData.is_anonymous,
+        notes: editFormData.notes,
+      }
+
+      if (editFormData.donation_type === "uang") {
+        updateData.nominal = editFormData.nominal
+        updateData.payment_method = editFormData.payment_method
+        // Recalculate net_amount when nominal changes
+        if (editFormData.nominal) {
+          updateData.net_amount = editFormData.nominal * 0.95
+        }
+      } else {
+        updateData.quantity = editFormData.quantity
+        updateData.clothing_list = editFormData.clothing_list
+        updateData.pickup_address = editFormData.pickup_address
+      }
+
+      const result = await updateDonation(editFormData.id, updateData)
+
+      if (result.success) {
+        toast({
+          title: "Berhasil",
+          description: "Data donasi berhasil diperbarui",
+        })
+
+        // Update local state
+        setDonations(
+          donations.map((d) => (d.id === editFormData.id ? { ...d, ...updateData } : d))
+        )
+
+        // Update selected donation if open in detail dialog
+        if (selectedDonation?.id === editFormData.id) {
+          setSelectedDonation({ ...selectedDonation, ...updateData })
+        }
+
+        setShowEditDialog(false)
+        loadDonations() // Reload to get fresh data
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Gagal memperbarui donasi",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Terjadi kesalahan",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -311,6 +385,14 @@ export default function DonationsPage() {
                           className="rounded-lg"
                         >
                           <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEdit(donation)}
+                          className="rounded-lg"
+                        >
+                          <Pencil className="w-4 h-4" />
                         </Button>
                         <Button
                           variant="destructive"
@@ -502,6 +584,230 @@ export default function DonationsPage() {
                   className="flex-1 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
                   Tutup
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-2xl rounded-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Donasi</DialogTitle>
+            <DialogDescription>
+              Ubah informasi donasi yang dipilih
+            </DialogDescription>
+          </DialogHeader>
+
+          {editFormData && (
+            <div className="space-y-4 mt-4">
+              {/* Donatur Info */}
+              <div className="space-y-4 pb-4 border-b">
+                <h4 className="font-semibold">Informasi Donatur</h4>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="donor_name">Nama Donatur</Label>
+                  <Input
+                    id="donor_name"
+                    value={editFormData.donor_name || ""}
+                    onChange={(e) =>
+                      setEditFormData({ ...editFormData, donor_name: e.target.value })
+                    }
+                    placeholder="Masukkan nama donatur"
+                    className="rounded-lg"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="donor_email">Email</Label>
+                  <Input
+                    id="donor_email"
+                    type="email"
+                    value={editFormData.donor_email || ""}
+                    onChange={(e) =>
+                      setEditFormData({ ...editFormData, donor_email: e.target.value })
+                    }
+                    placeholder="Masukkan email"
+                    className="rounded-lg"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="donor_phone">Nomor HP</Label>
+                  <Input
+                    id="donor_phone"
+                    value={editFormData.donor_phone || ""}
+                    onChange={(e) =>
+                      setEditFormData({ ...editFormData, donor_phone: e.target.value })
+                    }
+                    placeholder="Masukkan nomor HP"
+                    className="rounded-lg"
+                  />
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="is_anonymous"
+                    checked={editFormData.is_anonymous || false}
+                    onCheckedChange={(checked) =>
+                      setEditFormData({ ...editFormData, is_anonymous: checked as boolean })
+                    }
+                  />
+                  <Label htmlFor="is_anonymous" className="cursor-pointer">
+                    Donasi Anonim
+                  </Label>
+                </div>
+              </div>
+
+              {/* Donation Details */}
+              {editFormData.donation_type === "uang" ? (
+                <div className="space-y-4 pb-4 border-b">
+                  <h4 className="font-semibold">Detail Donasi Uang</h4>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="nominal">Nominal</Label>
+                    <Input
+                      id="nominal"
+                      type="number"
+                      value={editFormData.nominal || ""}
+                      onChange={(e) =>
+                        setEditFormData({ ...editFormData, nominal: Number(e.target.value) })
+                      }
+                      placeholder="Masukkan nominal"
+                      className="rounded-lg"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Netto (setelah 5%): Rp{" "}
+                      {((editFormData.nominal || 0) * 0.95).toLocaleString("id-ID")}
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="payment_method">Metode Pembayaran</Label>
+                    <Select
+                      value={editFormData.payment_method || ""}
+                      onValueChange={(value) =>
+                        setEditFormData({ ...editFormData, payment_method: value })
+                      }
+                    >
+                      <SelectTrigger id="payment_method" className="rounded-lg">
+                        <SelectValue placeholder="Pilih metode" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="transfer">Transfer Bank</SelectItem>
+                        <SelectItem value="ewallet">E-Wallet</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {editFormData.transfer_proof_url && (
+                    <div className="space-y-2">
+                      <Label>Bukti Transfer (tidak dapat diubah)</Label>
+                      {editFormData.transfer_proof_url.endsWith(".pdf") ? (
+                        <a
+                          href={editFormData.transfer_proof_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 text-primary hover:underline"
+                        >
+                          <FileText className="w-4 h-4" />
+                          Lihat PDF
+                        </a>
+                      ) : (
+                        <img
+                          src={editFormData.transfer_proof_url}
+                          alt="Bukti Transfer"
+                          className="max-w-xs h-auto rounded-lg border border-border"
+                        />
+                      )}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4 pb-4 border-b">
+                  <h4 className="font-semibold">Detail Donasi Pakaian</h4>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="quantity">Jumlah Pakaian</Label>
+                    <Input
+                      id="quantity"
+                      type="number"
+                      value={editFormData.quantity || ""}
+                      onChange={(e) =>
+                        setEditFormData({ ...editFormData, quantity: Number(e.target.value) })
+                      }
+                      placeholder="Masukkan jumlah"
+                      className="rounded-lg"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="clothing_list">Daftar Pakaian</Label>
+                    <Textarea
+                      id="clothing_list"
+                      value={editFormData.clothing_list || ""}
+                      onChange={(e) =>
+                        setEditFormData({ ...editFormData, clothing_list: e.target.value })
+                      }
+                      placeholder="Masukkan daftar pakaian"
+                      className="rounded-lg min-h-[100px]"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="pickup_address">Alamat Penjemputan</Label>
+                    <Textarea
+                      id="pickup_address"
+                      value={editFormData.pickup_address || ""}
+                      onChange={(e) =>
+                        setEditFormData({ ...editFormData, pickup_address: e.target.value })
+                      }
+                      placeholder="Masukkan alamat penjemputan"
+                      className="rounded-lg min-h-[100px]"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Notes */}
+              <div className="space-y-2">
+                <Label htmlFor="notes">Catatan</Label>
+                <Textarea
+                  id="notes"
+                  value={editFormData.notes || ""}
+                  onChange={(e) =>
+                    setEditFormData({ ...editFormData, notes: e.target.value })
+                  }
+                  placeholder="Masukkan catatan (opsional)"
+                  className="rounded-lg min-h-[80px]"
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-2 mt-6 pt-4 border-t">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowEditDialog(false)}
+                  className="flex-1 rounded-lg"
+                  disabled={isSaving}
+                >
+                  Batal
+                </Button>
+                <Button
+                  onClick={handleSaveEdit}
+                  className="flex-1 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground"
+                  disabled={isSaving}
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Menyimpan...
+                    </>
+                  ) : (
+                    "Simpan Perubahan"
+                  )}
                 </Button>
               </div>
             </div>
